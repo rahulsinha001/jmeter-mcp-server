@@ -1,0 +1,126 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "jmxFile",
+      "type": "promptString",
+      "description": "Enter JMX file name (e.g., demoApi.jmx)",
+      "default": "demoApi.jmx"
+    },
+    {
+      "id": "runId",
+      "type": "promptString",
+      "description": "Enter runId to analyze (e.g., mcqdobuv-1765738817915)",
+      "default": ""
+    },
+    {
+      "id": "users",
+      "type": "promptString",
+      "description": "Total virtual users",
+      "default": "10"
+    },
+    {
+      "id": "rampUp",
+      "type": "promptString",
+      "description": "Ramp-up time in seconds",
+      "default": "5"
+    },
+    {
+      "id": "duration",
+      "type": "promptString",
+      "description": "Test duration in seconds",
+      "default": "900"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "Start MCP Server",
+      "type": "shell",
+      "command": "node server-mcp-full.js",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+      "group": { "kind": "build", "isDefault": false },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    {
+      "label": "Run JMeter via MCP (JMX as-is)",
+      "type": "shell",
+      "command": "curl.exe -X POST http://localhost:4000/run -H \"Content-Type: application/json\" -d \"{\\\"jmxFile\\\":\\\"${input:jmxFile}\\\"}\"",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+      "group": { "kind": "build", "isDefault": false },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    {
+      "label": "Run JMeter via MCP (with dynamic runtime parameters)",
+      "type": "shell",
+      "command": "curl.exe -X POST http://localhost:4000/run -H \"Content-Type: application/json\" -d \"{\\\"jmxFile\\\":\\\"${input:jmxFile}\\\",\\\"jmeterArgs\\\":[\\\"-Jusers=${input:users}\\\",\\\"-JrampUp=${input:rampUp}\\\",\\\"-Jduration=${input:duration}\\\"]}\"",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+      "group": { "kind": "build", "isDefault": false },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    {
+      "label": "List all JMX files",
+      "type": "shell",
+      "command": "dir /b jmx\\*.jmx",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+      "group": { "kind": "build", "isDefault": false },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    {
+      "label": "Open last generated HTML report",
+      "type": "shell",
+      "command": "for /f \"delims=\" %i in ('dir /b /ad /o-d reports') do if exist \"reports\\%i\\html\\index.html\" (start \"\" \"reports\\%i\\html\\index.html\") else echo \"HTML report not found for %i\" & goto :done & :done",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+      "group": { "kind": "build", "isDefault": false },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    {
+      "label": "Clear all JMeter reports",
+      "type": "shell",
+      "command": "if exist reports (rmdir /s /q reports) & mkdir reports",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+      "group": { "kind": "build", "isDefault": false },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    {
+      "label": "Analyze JMeter Results",
+      "type": "shell",
+      "command": "node -e \"import('./handlers/analyzeResults.js').then(m=>m.analyzeJTL('reports/${input:runId}/result.jtl').then(console.log))\"",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+      "group": { "kind": "build", "isDefault": false },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    {
+      "label": "Analyze last run automatically",
+      "type": "shell",
+      "command": "for /f \"delims=\" %i in ('dir /b /ad /o-d reports') do node -e \"import('./handlers/analyzeResults.js').then(m=>m.analyzeJTL('reports/%i/result.jtl').then(console.log))\" & goto :done & :done",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+      "group": { "kind": "build", "isDefault": false },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    {
+      "label": "Get Correlation Suggestions",
+      "type": "shell",
+      "command": "curl http://localhost:4000/correlate/${input:jmxFile}",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+      "group": { "kind": "build", "isDefault": false },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    }
+  ]
+}

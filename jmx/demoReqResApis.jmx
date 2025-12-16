@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan"
+              testname="ReqRes - Intentional Fail Scenarios"
+              enabled="true">
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments"/>
+    </TestPlan>
+
+    <hashTree>
+
+      <!-- ===== Thread Group 1: Login (Wrong password) ===== -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup"
+                   testname="TG_Login_WrongPassword" enabled="true">
+
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+
+        <elementProp name="ThreadGroup.main_controller"
+                     elementType="LoopController">
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+          <stringProp name="LoopController.loops">-1</stringProp>
+        </elementProp>
+
+        <stringProp name="ThreadGroup.num_threads">${__P(users,1)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(rampUp,1)}</stringProp>
+
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${__P(duration,60)}</stringProp>
+        <stringProp name="ThreadGroup.delay">0</stringProp>
+
+      </ThreadGroup>
+
+      <hashTree>
+        <!-- HTTP Defaults -->
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement"
+                           testname="HTTP Defaults - reqres.in" enabled="true">
+          <stringProp name="HTTPSampler.domain">reqres.in</stringProp>
+          <stringProp name="HTTPSampler.port">443</stringProp>
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+
+        <!-- Header Manager -->
+        <HeaderManager guiclass="HeaderManagerGui" testclass="HeaderManager"
+                       testname="Headers - JSON" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+
+        <!-- Login Sampler -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui"
+                          testclass="HTTPSamplerProxy"
+                          testname="01_Login_WRONG_PASSWORD"
+                          enabled="true">
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.domain">reqres.in</stringProp>
+          <stringProp name="HTTPSampler.port">443</stringProp>
+          <stringProp name="HTTPSampler.path">/api/login</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="body" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">
+                  {"email":"eve.holt@reqres.in","password":"wrongpass"}
+                </stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+
+        <hashTree>
+          <ResponseAssertion guiclass="AssertionGui"
+                             testclass="ResponseAssertion"
+                             testname="Assert - Login contains token"
+                             enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="">token</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">RESPONSE_DATA</stringProp>
+            <intProp name="Assertion.test_type">16</intProp>
+          </ResponseAssertion>
+        </hashTree>
+
+        <ResultCollector guiclass="SummaryReport"
+                         testclass="ResultCollector"
+                         testname="Summary - Login TG"
+                         enabled="true"/>
+        <hashTree/>
+      </hashTree>
+
+      <!-- ===== Thread Group 2: Get User (Missing domain) ===== -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup"
+                   testname="TG_GetUser_MissingDomain" enabled="true">
+
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+
+        <elementProp name="ThreadGroup.main_controller"
+                     elementType="LoopController">
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+          <stringProp name="LoopController.loops">-1</stringProp>
+        </elementProp>
+
+        <stringProp name="ThreadGroup.num_threads">${__P(users,1)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(rampUp,1)}</stringProp>
+
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${__P(duration,60)}</stringProp>
+
+      </ThreadGroup>
+
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui"
+                          testclass="HTTPSamplerProxy"
+                          testname="02_GetUser_MissingDomain"
+                          enabled="true">
+          <stringProp name="HTTPSampler.path">/api/users/2</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+        </HTTPSamplerProxy>
+
+        <hashTree>
+          <ResponseAssertion guiclass="AssertionGui"
+                             testclass="ResponseAssertion"
+                             testname="Assert - GetUser has data"
+                             enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="">data</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">RESPONSE_DATA</stringProp>
+            <intProp name="Assertion.test_type">16</intProp>
+          </ResponseAssertion>
+        </hashTree>
+
+        <ResultCollector guiclass="SummaryReport"
+                         testclass="ResultCollector"
+                         testname="Summary - GetUser TG"
+                         enabled="true"/>
+        <hashTree/>
+      </hashTree>
+
+      <!-- ===== Thread Group 3: Create User (Invalid JSON) ===== -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup"
+                   testname="TG_CreateUser_InvalidJSON" enabled="true">
+
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+
+        <elementProp name="ThreadGroup.main_controller"
+                     elementType="LoopController">
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+          <stringProp name="LoopController.loops">-1</stringProp>
+        </elementProp>
+
+        <stringProp name="ThreadGroup.num_threads">${__P(users,1)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(rampUp,1)}</stringProp>
+
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${__P(duration,60)}</stringProp>
+
+      </ThreadGroup>
+
+      <hashTree>
+        <!-- (Rest unchanged – invalid JSON preserved) -->
+      </hashTree>
+
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

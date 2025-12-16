@@ -1,0 +1,28 @@
+{
+  "name": "jmeter-mcp-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "body-parser": "^2.2.1",
+    "chalk": "^5.6.2",
+    "child_process": "^1.0.2",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "json-colorizer": "^3.0.1",
+    "node-fetch": "^3.3.2",
+    "openai": "^6.10.0",
+    "uuid": "^13.0.0",
+    "xml2js": "^0.6.2"
+  }
+}
