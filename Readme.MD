@@ -5,6 +5,7 @@ This repository provides a **VS Code–driven JMeter execution and analysis fram
 The project is intentionally designed to:
 
 * Run **existing JMX files as-is** (created from JMeter UI)
+* Convert **Postman collections to valid JMeter JMX files**
 * Optionally run **JMX files with dynamic runtime parameters**
 * Provide **correlation suggestions**
 * Generate **HTML reports**
@@ -18,28 +19,33 @@ The project is intentionally designed to:
 JMETER-MCP-SERVER/
 │
 ├── .vscode/
-│   └── tasks.json              # All execution is driven from here
+│   └── tasks.json                    # All execution is driven from here
 │
 ├── handlers/
-│   ├── analyzeResults.js       # Parses JTL & provides summary analysis
-│   ├── correlationEngine.js    # Detects potential dynamic values for correlation
-│   ├── jmxParser.js            # Parses JMX XML structure
-│   ├── listTests.js            # Lists available JMX tests
-│   └── runJMeter.js            # Placeholder (will be used by MCP server for future enhancements)
+│   ├── analyzeResults.js             # Parses JTL & provides summary analysis
+│   ├── correlationEngine.js          # Detects potential dynamic values for correlation
+│   ├── jmxParser.js                  # Parses JMX XML structure
+│   ├── listTests.js                  # Lists available JMX tests
+│   ├── jsonToJmxConverter.js         # Converts Postman collection → JMeter JMX
+│   └── runJMeter.js                  # Placeholder (will be used for enhancements)
 │
-├── jmx/                         # Place all JMeter test plans here
-│   ├── demoApi.jmx -- # This is plain JMX file without having dynamic parameters like- THread Group etc.
+├── jmx/                              # Place all JMeter test plans here
+│   ├── demoApi.jmx
 │   ├── demoReqResApis.jmx
 │   ├── postman-echo_demo.jmx
 │   ├── postman-echo-complex-dynamic.jmx
 │   ├── postman-echo-multi-dynamic-ids.jmx
-│   └── sample_test.jmx
+│   ├── sample_test.jmx
+│   └── generated_demo_collection.jmx # Auto-generated from Postman
 │
-├── reports/                     # Auto-generated JMeter reports
-├── temp/                        # Temporary execution files
+├── postman/
+│   └── demo_collection.json          # Postman collection input
 │
-├── .env                         # Environment configuration (JMeter path)
-├── server-mcp-full.js           # MCP Server entry point
+├── reports/                          # Auto-generated JMeter reports
+├── temp/                             # Temporary execution files
+│
+├── .env                              # Environment configuration (JMeter path)
+├── server-mcp-full.js                # MCP Server entry point
 ├── package.json
 ├── package-lock.json
 └── README.md
@@ -47,7 +53,7 @@ JMETER-MCP-SERVER/
 
 ---
 
-## 2. Prerequisites
+## 2. Prerequisites (For All Teammates)
 
 ### Required Software
 
@@ -63,7 +69,7 @@ JMETER-MCP-SERVER/
 ## 3. Cloning the Repository
 
 ```bash
-git clone https://github.com/rahulsinha001/jmeter-mcp-server.git
+git clone https://github.com/rahulsinha001/jmeter-mcp-server.gi
 cd jmeter-mcp-server
 ```
 
@@ -126,32 +132,60 @@ This project does **NOT require manual CLI execution**.
 
 All actions are executed via:
 
-```text
+```
 Ctrl + Shift + B
 ```
 
 You will see a list of tasks such as:
 
 * Start MCP Server
-* Run JMeter via MCP (with dynamic runtime parameters)
 * Run JMeter (As-Is)
+* Run JMeter via MCP (Dynamic)
+* Convert Postman Collection to JMX
 * List all JMX files
 * Analyze Results
-* Analyze last run automatically
 * Open HTML Report
 * Get Correlation Suggestions
-* Clear all JMeter Reports
 
 ---
 
-## 8. Running JMeter – Two Supported Modes
+## 8. Postman Collection → JMeter JMX Conversion
 
-### 🔹 Option 1: Run JMX As-Is (Recommended for UI-created tests)
+This framework supports direct conversion of Postman collections into valid JMeter JMX files, ready for execution.
+
+### How to Convert
+
+1. Place your Postman collection under the `postman/` folder
+2. Press `Ctrl + Shift + B`
+3. Select **Convert Postman Collection to JMX**
+4. Enter path, for example:
+
+```
+postman/demo_collection.json
+```
+
+✅ Generated output:
+
+```
+jmx/generated_demo_collection.jmx
+```
+
+The generated JMX:
+
+* Loads cleanly in JMeter GUI
+* Executes correctly via CLI / MCP
+* Includes safe default HTTP timeouts
+
+---
+
+## 9. Running JMeter – Two Supported Modes
+
+### 🔹 Option 1: Run JMX As-Is (Recommended)
 
 Use this when:
 
 * JMX already has thread group settings
-* Load model is defined in JMeter UI
+* Load model is defined in JMeter UI or generated JMX
 
 Flow:
 
@@ -192,19 +226,19 @@ Flow:
 
 ---
 
-## 9. MCP Server (`server-mcp-full.js`)
+## 10. MCP Server (`server-mcp-full.js`)
 
 ### Responsibilities
 
 * Starts HTTP server (default port 4000)
 * Receives run requests from VS Code tasks
-* Executes JMeter using Node
+* Executes JMeter using Node.js
 * Generates:
 
   * JTL files
   * HTML reports
 
-You start it using:
+Start using:
 
 ```
 Ctrl + Shift + B → Start MCP Server
@@ -212,19 +246,24 @@ Ctrl + Shift + B → Start MCP Server
 
 ---
 
-## 10. Handlers – What Each File Does
+## 11. Handlers – What Each File Does
+
+### `jsonToJmxConverter.js`
+
+* Converts Postman collections to valid JMeter JMX
+* Builds correct JMeter HashTree structure
+* Injects safe default HTTP timeouts
 
 ### `runJMeter.js`
 
 * Builds JMeter command
-* Handles both execution modes
+* Handles execution modes
 * Writes results to `/reports`
 
 ### `jmxParser.js`
 
 * Reads JMX XML
 * Extracts samplers and parameters
-* Used by correlation engine
 
 ### `correlationEngine.js`
 
@@ -236,22 +275,6 @@ Ctrl + Shift + B → Start MCP Server
 
 * Parses JTL files
 * Computes basic metrics
-* Used by analysis tasks
-
----
-
-## 11. Correlation Suggestions
-
-Run via:
-
-```
-Ctrl + Shift + B → Get Correlation Suggestions
-```
-
-This:
-
-* Does NOT change JMX
-* Provides insight similar to LoadRunner correlation hints
 
 ---
 
@@ -271,20 +294,28 @@ Ctrl + Shift + B → Open last generated HTML report
 
 ---
 
-## 13. Adding New JMX Tests
+## 13. Adding New Tests
+
+### JMeter UI
 
 1. Create test in JMeter UI
 2. Save `.jmx`
-3. Copy to `jmx/` folder
+3. Copy to `jmx/`
 4. Run using VS Code tasks
 
-No code changes required.
+### Postman
+
+1. Export Postman collection (v2.x)
+2. Copy to `postman/`
+3. Convert using VS Code task
+4. Run generated JMX
 
 ---
 
 ## 14. Current Implementation Scope
 
 ✔ JMX execution
+✔ Postman → JMX conversion
 ✔ Dynamic parameter support
 ✔ Correlation suggestions
 ✔ Result analysis
@@ -319,6 +350,7 @@ No code changes required.
 
 * This framework **does not replace JMeter UI**
 * It complements it with **repeatable execution & automation**
+* Ideal for demos, POCs, interviews, and internal teams
 
 ---
 
