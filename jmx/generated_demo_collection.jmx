@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+
+    <!-- Test Plan -->
+    <TestPlan guiclass="TestPlanGui"
+      testclass="TestPlan"
+      testname="Postman Converted Test Plan"
+      enabled="true">
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+
+      <!-- HTTP Request Defaults (GLOBAL TIMEOUTS) -->
+      <ConfigTestElement guiclass="HttpDefaultsGui"
+        testclass="ConfigTestElement"
+        testname="HTTP Request Defaults"
+        enabled="true">
+        <stringProp name="HTTPSampler.connect_timeout">10000</stringProp>
+        <stringProp name="HTTPSampler.response_timeout">15000</stringProp>
+      </ConfigTestElement>
+      <hashTree/>
+
+      <!-- Thread Group -->
+      <ThreadGroup guiclass="ThreadGroupGui"
+        testclass="ThreadGroup"
+        testname="Thread Group"
+        enabled="true">
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <elementProp name="ThreadGroup.main_controller"
+          elementType="LoopController"
+          guiclass="LoopControlPanel"
+          testclass="LoopController"
+          enabled="true">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+
+        
+<HTTPSamplerProxy guiclass="HttpTestSampleGui"
+  testclass="HTTPSamplerProxy"
+  testname="API List (Docs Page)"
+  enabled="true">
+  <stringProp name="HTTPSampler.domain">automationexercise.com</stringProp>
+  <stringProp name="HTTPSampler.protocol">https</stringProp>
+  <stringProp name="HTTPSampler.path">/api_list</stringProp>
+  <stringProp name="HTTPSampler.method">GET</stringProp>
+  <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+  <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+</HTTPSamplerProxy>
+<hashTree/>
+
+
+<HTTPSamplerProxy guiclass="HttpTestSampleGui"
+  testclass="HTTPSamplerProxy"
+  testname="Get All Products List"
+  enabled="true">
+  <stringProp name="HTTPSampler.domain">automationexercise.com</stringProp>
+  <stringProp name="HTTPSampler.protocol">https</stringProp>
+  <stringProp name="HTTPSampler.path">/api/productsList</stringProp>
+  <stringProp name="HTTPSampler.method">GET</stringProp>
+  <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+  <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+</HTTPSamplerProxy>
+<hashTree/>
+
+
+<HTTPSamplerProxy guiclass="HttpTestSampleGui"
+  testclass="HTTPSamplerProxy"
+  testname="Get All Brands List"
+  enabled="true">
+  <stringProp name="HTTPSampler.domain">automationexercise.com</stringProp>
+  <stringProp name="HTTPSampler.protocol">https</stringProp>
+  <stringProp name="HTTPSampler.path">/api/brandsList</stringProp>
+  <stringProp name="HTTPSampler.method">GET</stringProp>
+  <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+  <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+</HTTPSamplerProxy>
+<hashTree/>
+
+
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
